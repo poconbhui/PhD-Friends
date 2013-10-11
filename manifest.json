@@ -1,0 +1,17 @@
+{
+    "manifest_version": 2,
+    "name": "PhD Friends!",
+    "version": "0.0.1",
+
+    "description": "Learn the names and faces of your friends!",
+
+    "browser_action": {},
+
+    "background": {
+        "scripts": ["background.js"]
+    },
+
+    "permissions": [
+        "http://www.ed.ac.uk/*"
+    ]
+}
