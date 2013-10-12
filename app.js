@@ -9,8 +9,8 @@ $(document).ready(function() {
 /////////////////////////////////////////////////
 
 var $face = $('#face');
-var $name = $('#name');
-var $guess_name = $('#guess-name');
+var $guessed_name = $('#guessed-name');
+var $make_guess = $('#make-guess');
 var $give_up = $('#give-up');
 var $guesses = $('#guesses');
 
@@ -121,12 +121,12 @@ function get_arr_random(array) {
 
 // Reset everything
 function reset_game() {
-    $name.val(null);
+    $guessed_name.val('');
 
     $face.attr('src', null);
     $face.data('name', 'None');
 
-    $guess_name.data('num_guesses', max_guesses);
+    $make_guess.data('num_guesses', max_guesses);
 
     $guesses.empty();
 }
@@ -184,19 +184,19 @@ function get_new_face() {
 }
 
 
-// Check that the guess in $name is either the first name or whole name
+// Check that the guess in $guessed_name is either the first name or whole name
 // stored in $face.data('name')
 function check_guess() {
-    var guess = $name.val();
+    var guess = $guessed_name.val();
     var answer = $face.data('name');
     var first_name = answer.split(' ')[0];
 
     // Quick check that guess is not null before num_guesses is touched
     if(guess.length == 0) return;
-    $name.val('');
+    $guessed_name.val('');
 
-    var num_guesses = $guess_name.data('num_guesses') - 1;
-    $guess_name.data('num_guesses', num_guesses);
+    var num_guesses = $make_guess.data('num_guesses') - 1;
+    $make_guess.data('num_guesses', num_guesses);
 
 
     function compare_names(n1, n2) {
@@ -230,21 +230,21 @@ function check_guess() {
 
 
 // On clicking "guess", check guess
-$guess_name.click(function() {
+$make_guess.click(function() {
     check_guess();
 });
 
 
 // On pressing enter in the guess box, check guess
-$name.keydown(function(e) {
+$guessed_name.keydown(function(e) {
     // If enter pressed
     if(e.keyCode == 13) check_guess();
 });
 
 
-// On giving up, put the correct answer in $name
+// On giving up, put the correct answer in $guessed_name
 $give_up.click(function() {
-    $name.val($face.data('name'));
+    $guessed_name.val($face.data('name'));
 });
 
 
