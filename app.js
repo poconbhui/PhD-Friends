@@ -22,6 +22,7 @@ var $guesses = $('#guesses');
 ////////////////////
 
 var max_guesses = 3;
+var name_per_round = 10;
 
 
 
@@ -29,6 +30,36 @@ var max_guesses = 3;
 /////////////////////////////////////////
 // Define functions for use in the app //
 /////////////////////////////////////////
+
+
+var score = new function() {
+    var $score = $('#score');
+    var score = 0;
+
+    this.getScore = function() {
+        return score;
+    }
+
+    this.add = function(name) {
+        var value = name.split(' ').length;
+
+        score += value;
+
+        $score.html(score);
+    }
+
+    this.remove = function(name) {
+        var value = name.split(' ').length;
+
+        score -= value;
+
+        $score.html(score);
+    }
+
+
+    $score.html('0');
+};
+
 
 // Scrape the student page and return the data in cb(data, error)
 function scrapeStudentsPage(cb) {
@@ -190,6 +221,8 @@ function get_new_face() {
 
                             $face.attr('src', individual.face);
                             $face.data('name', individual.name);
+
+                            $guessed_name.focus();
                         }
                     }
                 })();
@@ -223,33 +256,32 @@ function check_guess() {
     var answer = $face.data('name');
     var first_name = answer.split(' ')[0];
 
-    // Quick check that guess is not null before num_guesses is touched
-    if(guess.length == 0) return;
-    $guessed_name.val('');
 
-    var num_guesses = $make_guess.data('num_guesses') - 1;
-    $make_guess.data('num_guesses', num_guesses);
+    function compare_names() {
+        var n1 = guess.toLowerCase().split(' ');
+        var n2 = answer.toLowerCase().split(' ');
 
+        for(var i=0; i<n2.length; i++) {
+            if(n1[i] != n2[i]) {
+                break;
+            }
+        }
 
-    function compare_names(n1, n2) {
-        return n1.toLowerCase() == n2.toLowerCase();
+        return i;
     }
 
+
     // If right
-    if(
-        compare_names(guess, answer)
-        || compare_names(guess, first_name)
-    ) {
-        $guesses.append("<li class='alert-success'>"+answer+"</li>");
-        get_new_face();
+    if(compare_names()) {
+
+        return true;
+
     }
     // If wrong
     else {
-        $guesses.append("<li class='alert-danger'>"+guess+"</li>");
 
-        if(num_guesses <= 0) {
-            $give_up.click();
-        }
+        return false;
+
     }
 }
 
@@ -263,20 +295,49 @@ function check_guess() {
 
 // On clicking "guess", check guess
 $make_guess.click(function() {
-    check_guess();
+    // Quick check that guess is not null before num_guesses is touched
+    if($guessed_name.val().length == 0) return;
+
+    var num_guesses = $make_guess.data('num_guesses') - 1;
+    $make_guess.data('num_guesses', num_guesses);
+
+    var correct = check_guess();
+
+    if(correct) {
+        $guesses.append("<li class='alert-success'>"+$face.data('name')+"</li>");
+
+        if(!$make_guess.data('gave_up')) score.add($guessed_name.val());
+        $make_guess.data('gave_up', false);
+
+        get_new_face();
+    }
+    else {
+        $guesses.append("<li class='alert-danger'>"+$guessed_name.val()+"</li>");
+
+        if(num_guesses <= 0) {
+            $give_up.click();
+        }
+    }
+
+    // Reset guess field for next guess
+    $guessed_name.val('');
 });
 
 
 // On pressing enter in the guess box, check guess
 $guessed_name.keydown(function(e) {
     // If enter pressed
-    if(e.keyCode == 13) check_guess();
+    if(e.keyCode == 13) $make_guess.click();
 });
 
 
 // On giving up, put the correct answer in $guessed_name
+// and remove the appropriate score
 $give_up.click(function() {
+    score.remove($face.data('name'));
     $guessed_name.val($face.data('name'));
+
+    $make_guess.data('gave_up', true);
 });
 
 
