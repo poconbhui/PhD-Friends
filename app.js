@@ -58,58 +58,76 @@ function scrapeIndividualPage(indv, cb) {
 
 
 // Get a list of students {indv, name} and return in cb(students, error)
+var getStudentsCache = [];
 function getStudents(cb) {
-    scrapeStudentsPage(function(data) {
+    if(getStudentsCache.length) {
+        cb(getStudentsCache, null);
+    }
+    else {
+        scrapeStudentsPage(function(data) {
 
-        // Get links between title Full-Time... and M.Sc.
-        // Effectively, only PhD students
-        data = data.match(
-            /Full-Time Research Students.*M.Sc. Carbon Capture and Storage/
-        )[0];
+            // Get links between title Full-Time... and M.Sc.
+            // Effectively, only PhD students
+            data = data.match(
+                /Full-Time Research Students.*M.Sc. Carbon Capture and Storage/
+            )[0];
 
-        // Match all person links in selected section
-        var matches = data.match(
-            /<a href=[^>]*indv=\d*&cw_xml=student.html">[^<]*<\/a>/g
-        );
+            // Match all person links in selected section
+            var matches = data.match(
+                /<a href=[^>]*indv=\d*&cw_xml=student.html">[^<]*<\/a>/g
+            );
 
-        // Parse the links into a format {indv, name}
-        for(var i in matches) {
-            data = matches[i].match(/indv=(\d*)&.*>(.*)</);
+            // Parse the links into a format {indv, name}
+            for(var i in matches) {
+                data = matches[i].match(/indv=(\d*)&.*>(.*)</);
 
-            matches[i] = {
-                indv: data[1],
-                name: data[2]
-            };
-        }
+                matches[i] = {
+                    indv: data[1],
+                    name: data[2]
+                };
+            }
 
-        // Return all the parsed matches
-        cb(matches, null);
-    });
+            // Cache results
+            getStudentsCache = matches;
+
+            // Return all the parsed matches
+            cb(matches, null);
+        });
+    }
 }
 
 
 // Get data {face, name} for an individual from their id and return
 // in cb(individual, error)
+var getIndividualCache = {};
 function getIndividual(indv, cb) {
-    scrapeIndividualPage(indv, function(data) {
-        var individual = {};
+    if(getIndividualCache[indv]) {
+        cb(getIndividualCache[indv], null);
+    }
+    else {
+        scrapeIndividualPage(indv, function(data) {
+            var individual = {};
 
-        individual.face = (function() {
-            var matches = data.match(/src="([^"]*\/faces\/[^"]*)"/);
+            individual.face = (function() {
+                var matches = data.match(/src="([^"]*\/faces\/[^"]*)"/);
 
-            if(matches) return matches[1];
-            else        return 'None';
-        })();
+                if(matches) return matches[1];
+                else        return 'None';
+            })();
 
-        individual.name = (function() {
-            var matches = data.match(/<div id="geosPeople"> *<h3>([^<]*)<\/h3>/);
+            individual.name = (function() {
+                var matches = data.match(/<div id="geosPeople"> *<h3>([^<]*)<\/h3>/);
 
-            if(matches) return matches[1];
-            else        return 'None';
-        })();
+                if(matches) return matches[1];
+                else        return 'None';
+            })();
 
-        cb(individual, null);
-    });
+            // Add individual to cache
+            getIndividualCache[indv] = individual;
+
+            cb(individual, null);
+        });
+    }
 }
 
 
@@ -158,19 +176,33 @@ function get_new_face() {
                     return;
                 }
 
+                // Generate setting function
+                // Expect it to be called twice before running
+                var set_face = (function() {
+                    var count = 0;
+
+                    return function() {
+                        count = count + 1;
+
+                        if(count == 2) {
+                            // Clear everything
+                            reset_game();
+
+                            $face.attr('src', individual.face);
+                            $face.data('name', individual.name);
+                        }
+                    }
+                })();
+
+                // Want face to hang for about a second
+                setTimeout(set_face, 1000);
+
 
                 // Use Image so we can catch 404ed images
                 var img = new Image;
 
                 // When loaded, set face and name
-                img.onload = function(e) {
-
-                    // Clear everything
-                    reset_game();
-
-                    $face.attr('src', individual.face);
-                    $face.data('name', individual.name);
-                }
+                img.onload = set_face;
 
                 // On error, rerun this function
                 img.onerror = function() {
