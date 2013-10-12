@@ -60,16 +60,29 @@ function scrapeIndividualPage(indv, cb) {
 // Get a list of students {indv, name} and return in cb(students, error)
 function getStudents(cb) {
     scrapeStudentsPage(function(data) {
-        var matches = data.match(/<a href=[^>]*indv=\d*&cw_xml=student.html">[^<]*<\/a>/g);
 
+        // Get links between title Full-Time... and M.Sc.
+        // Effectively, only PhD students
+        data = data.match(
+            /Full-Time Research Students.*M.Sc. Carbon Capture and Storage/
+        )[0];
+
+        // Match all person links in selected section
+        var matches = data.match(
+            /<a href=[^>]*indv=\d*&cw_xml=student.html">[^<]*<\/a>/g
+        );
+
+        // Parse the links into a format {indv, name}
         for(var i in matches) {
             data = matches[i].match(/indv=(\d*)&.*>(.*)</);
+
             matches[i] = {
                 indv: data[1],
                 name: data[2]
             };
         }
 
+        // Return all the parsed matches
         cb(matches, null);
     });
 }
@@ -85,14 +98,14 @@ function getIndividual(indv, cb) {
             var matches = data.match(/src="([^"]*\/faces\/[^"]*)"/);
 
             if(matches) return matches[1];
-            else        return '';
+            else        return 'None';
         })();
 
         individual.name = (function() {
             var matches = data.match(/<div id="geosPeople"> *<h3>([^<]*)<\/h3>/);
 
             if(matches) return matches[1];
-            else        return '';
+            else        return 'None';
         })();
 
         cb(individual, null);
@@ -111,7 +124,7 @@ function reset_game() {
     $name.val(null);
 
     $face.attr('src', null);
-    $face.data('name', '');
+    $face.data('name', 'None');
 
     $guess_name.data('num_guesses', max_guesses);
 
@@ -124,7 +137,7 @@ function reset_game() {
 function get_new_face() {
 
     // Disable answering for a minute
-    $face.data('name', '');
+    $face.data('name', 'None');
 
     // Scrape a new face and name
     getStudents(function(students) {
@@ -135,6 +148,12 @@ function get_new_face() {
 
                 // If dummy image, try again
                 if(individual.face.match(/dummy.jpg/)) {
+                    localGetIndividual();
+                    return;
+                }
+
+                // If no name, try again
+                if(individual.name == 'None') {
                     localGetIndividual();
                     return;
                 }
