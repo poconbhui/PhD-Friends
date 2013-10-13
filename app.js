@@ -13,6 +13,7 @@ var $guessed_name = $('#guessed-name');
 var $make_guess = $('#make-guess');
 var $give_up = $('#give-up');
 var $guesses = $('#guesses');
+var $new_list = $('#new-list');
 
 
 
@@ -162,9 +163,11 @@ function getIndividual(indv, cb) {
 }
 
 
-// Return a random element from an array
-function get_arr_random(array) {
-    return array[Math.floor(Math.random()*array.length)];
+// Return a random element from an array within a focus
+function get_arr_random(array, start, end) {
+    var elem = Math.floor(start + Math.random()*(end - start));
+    
+    return array[elem];
 }
 
 
@@ -191,7 +194,8 @@ function get_new_face() {
     // Scrape a new face and name
     getStudents(function(students) {
         (function localGetIndividual() {
-            var student = get_arr_random(students);
+            var focus = $new_list.data('start') || 0;
+            var student = get_arr_random(students, focus, focus+10);
 
             getIndividual(student.indv, function(individual) {
 
@@ -339,6 +343,14 @@ $give_up.click(function() {
 
     $make_guess.data('gave_up', true);
 });
+
+
+$new_list.click(function() {
+    console.log("clicking!");
+    getStudents(function(students) {
+        $new_list.data('start', Math.floor(Math.random()*students.length));
+    });
+}).click();
 
 
 
