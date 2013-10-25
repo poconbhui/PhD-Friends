@@ -3,7 +3,9 @@
     <title>PhD Friends!</title>
 
     <script src="assets/js/jquery.min.js" type="text/javascript"></script>
+
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
+    <script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
 
     <script src="app.js" type="text/javascript"></script>
 
@@ -33,9 +35,30 @@
                 <div class="input-group">
                     <input id="guessed-name" type="text" class="form-control">
                     <span class="input-group-btn">
-                        <button id="make-guess" class="btn btn-primary">Guess</button>
+                        <button id="make-guess" class="btn btn-primary">
+                            Guess
+                        </button>
+
                         <button id="give-up" class="btn">Give Up</button>
-                        <button id="new-list" class=btn>New List</button>
+
+                        <div class="btn-group" style="margin-left: 10px;">
+                            <button id="new-list" class="btn btn-default">
+                                New List
+                            </button>
+                            <button id="list-length"
+                                class="btn btn-default dropdown-toggle"
+                                data-toggle="dropdown">
+                                <span class="caret"></span>
+                            </button>
+                            <ul id="list-length-options"
+                                class="dropdown-menu" role="menu">
+                                <li><a href="#">10</a></li>
+                                <li><a href="#">25</a></li>
+                                <li><a href="#">50</a></li>
+                                <li><a href="#">100</a></li>
+                                <li><a href="#">all</a></li>
+                            </ul>
+                        </div>
                     </span>
                 </div>
             </div>

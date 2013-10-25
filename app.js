@@ -14,6 +14,8 @@ var $make_guess = $('#make-guess');
 var $give_up = $('#give-up');
 var $guesses = $('#guesses');
 var $new_list = $('#new-list');
+var $list_length = $('#list-length');
+var $list_length_options = $('#list-length-options');
 
 
 
@@ -166,6 +168,7 @@ function getIndividual(indv, cb) {
 // Return a random element from an array within a focus
 function get_arr_random(array, start, end) {
     var elem = Math.floor(start + Math.random()*(end - start));
+    //var elem = Math.floor(Math.random()*array.length)
     
     return array[elem];
 }
@@ -179,6 +182,8 @@ function reset_game() {
     $face.data('name', 'None');
 
     $make_guess.data('num_guesses', max_guesses);
+
+    $give_up.data('gave_up', false);
 
     $guesses.empty();
 }
@@ -195,7 +200,9 @@ function get_new_face() {
     getStudents(function(students) {
         (function localGetIndividual() {
             var focus = $new_list.data('start') || 0;
-            var student = get_arr_random(students, focus, focus+10);
+            var width = $new_list.data('length') || students.length-1;
+
+            var student = get_arr_random(students, focus, focus + width);
 
             getIndividual(student.indv, function(individual) {
 
@@ -310,8 +317,7 @@ $make_guess.click(function() {
     if(correct) {
         $guesses.append("<li class='alert-success'>"+$face.data('name')+"</li>");
 
-        if(!$make_guess.data('gave_up')) score.add($guessed_name.val());
-        $make_guess.data('gave_up', false);
+        if(!$give_up.data('gave_up')) score.add($guessed_name.val());
 
         get_new_face();
     }
@@ -320,6 +326,7 @@ $make_guess.click(function() {
 
         if(num_guesses <= 0) {
             $give_up.click();
+            return;
         }
     }
 
@@ -338,19 +345,55 @@ $guessed_name.keydown(function(e) {
 // On giving up, put the correct answer in $guessed_name
 // and remove the appropriate score
 $give_up.click(function() {
-    score.remove($face.data('name'));
+    if(!$give_up.data('gave_up')) score.remove($face.data('name'));
     $guessed_name.val($face.data('name'));
 
-    $make_guess.data('gave_up', true);
+    $give_up.data('gave_up', true);
 });
 
 
+// Set up new list generation
 $new_list.click(function() {
-    console.log("clicking!");
+    // If working over the whole list, always start at 0
+    if(!$new_list.data('length')){
+        $new_list.data('start', 0);
+        return;
+    }
+
     getStudents(function(students) {
         $new_list.data('start', Math.floor(Math.random()*students.length));
     });
 }).click();
+
+
+// Set up list length selection
+$list_length_options.find('a').click(function() {
+    var $this = $(this);
+
+    // Unmark all options
+    $list_length_options.find('a .glyphicon').remove();
+
+    // Find value of current option
+    var val = $this.text();
+
+    if(val == 'all') val = 0;
+
+    val = parseInt(val);
+
+    console.log(val);
+
+    $new_list.data('length', val);
+
+    // Get a new list for the new number
+    $new_list.click();
+
+    // Mark this option
+    $this.append('  <span class="glyphicon glyphicon-ok"></span>');
+});
+
+// Initially click the "all" option
+$list_length_options.find('a:contains(all)').click();
+
 
 
 
