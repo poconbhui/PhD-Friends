@@ -394,6 +394,8 @@ $list_length_options.find('a').click(function() {
 // Initially click the "all" option
 $list_length_options.find('a:contains(all)').click();
 
+$('.open .dropdown-toggle').dropdown('toggle');
+
 
 
 
