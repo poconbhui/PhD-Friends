@@ -116,11 +116,10 @@ function peoplePageToArr(data) {
 
     // Parse the links into a format {indv, name}
     for(var i in matches) {
-        data = matches[i].match(/indv=(\d*)&.*>(.*)</);
+        data = matches[i].match(/indv=(\d*)&/);
 
         matches[i] = {
-            indv: data[1],
-            name: data[2]
+            indv: data[1]
         };
     }
 
