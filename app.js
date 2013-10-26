@@ -1,8 +1,6 @@
 "use strict"
 
 var express = require('express');
-var ejs = require('ejs');
-
 var app = express();
 
 
@@ -12,11 +10,6 @@ app.configure(function() {
 
     // Add gzipping while sending data
     app.use(express.compress());
-
-    // Serve .html files
-    app.set('views', __dirname + '/views');
-    app.set('view engine', 'ejs');
-    app.engine('.html', ejs.__express);
 
     // Serve static files from /assets
     var one_year = 31557600000;
@@ -30,7 +23,7 @@ app.configure(function() {
 
 // Serve index
 app.get('/', function(req, res) {
-    res.render('index.html');
+    res.sendfile(__dirname + '/views/index.html');
 });
 
 
