@@ -4,6 +4,10 @@ var express = require('express');
 var app = express();
 
 
+// Definition of one year for caching
+var one_year = 31557600000;
+
+
 // Set up express
 app.configure(function() {
     app.set('port', process.env.PORT || 5000);
@@ -12,7 +16,6 @@ app.configure(function() {
     app.use(express.compress());
 
     // Serve static files from /assets
-    var one_year = 31557600000;
     app.use(
         '/assets',
         express.static(__dirname + '/assets', {maxAge: one_year})
@@ -23,7 +26,7 @@ app.configure(function() {
 
 // Serve index
 app.get('/', function(req, res) {
-    res.sendfile(__dirname + '/views/index.html');
+    res.sendfile(__dirname + '/views/index.html', {maxAge: one_year});
 });
 
 
