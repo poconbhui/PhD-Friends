@@ -12,7 +12,8 @@
 
     "dependencies": {
         "express": "3.4.3",
-        "memjs": "0.8.0"
+        "memjs": "0.8.0",
+        "request": "*"
     },
 
     "engines": {

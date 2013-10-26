@@ -1,7 +1,8 @@
 "use strict"
 
-var quickGet = require(__dirname + '/../helpers/quickGet');
 var memjs = require('memjs').Client.create();
+var request = require('request');
+var qs = require('querystring');
 
 
 var People = function() {
@@ -20,15 +21,18 @@ var People = function() {
         memjs.get('people', function(err, value, key) {
             if(value) {
                 var people = JSON.parse(value.toString());
+
                 cb(people, null);
             }
             else {
                 // Generate request to geophysics
-                var params = { cw_xml: 'students.html' };
-                quickGet(people_url, params, function(str,err) {
-                    var people = JSON.stringify(peoplePageToArr(str));
+                var url = people_url
+                    + '?' + qs.stringify({ cw_xml: 'students.html' });
 
-                    memjs.set('people', people);
+                request(url, function(err, headers, body) {
+                    var people = peoplePageToArr(body);
+
+                    memjs.set('people', JSON.stringify(people));
                     cb(people, null);
                 });
             }
@@ -47,11 +51,13 @@ var People = function() {
             }
             else {
                 // Generate request to geophysics
-                var params = { cw_xml: 'student.html', indv: id };
-                quickGet(people_url, params, function(str,err) {
-                    var individual = JSON.stringify(individualPageToObj(str));
+                var url = people_url
+                    + '?' + qs.stringify({ cw_xml: 'student.html', indv: id });
 
-                    memjs.set('people:'+id, individual);
+                request(url, function(err, headers, body) {
+                    var individual = individualPageToObj(body);
+
+                    memjs.set('people:'+id, JSON.stringify(individual));
                     cb(individual, null);
                 });
             }

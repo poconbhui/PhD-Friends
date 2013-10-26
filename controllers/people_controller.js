@@ -1,6 +1,5 @@
 "use strict"
 
-var quickGet = require(__dirname + '/../helpers/quickGet');
 var People = require(__dirname + '/../models/people');
 
 
