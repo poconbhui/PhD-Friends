@@ -22,6 +22,7 @@ function objectToGet(obj) {
 // Get data from a url with the given params as an object
 // and return the string of data in cb(string, err)
 function quickGet(url, params, cb) {
+    console.log(url);
     http.get(url + '?' + objectToGet(params), function(people_res) {
 
         var str = '';
@@ -35,6 +36,9 @@ function quickGet(url, params, cb) {
         people_res.on('end', function () {
             cb(str, null);
         });
+    }).on('error', function(e) {
+        console.log("Got error: ", e.message);
+        cb(null, e);
     });
 }
 

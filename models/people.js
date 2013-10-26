@@ -19,7 +19,7 @@ var People = function() {
     this.all = function(cb) {
         memjs.get('people', function(err, value, key) {
             if(value) {
-                var people = eval(value.toString());
+                var people = JSON.parse(value.toString());
                 cb(people, null);
             }
             else {
@@ -42,14 +42,14 @@ var People = function() {
     this.find = function(id, cb) {
         memjs.get('people:'+id, function(err, value, key) {
             if(value) {
-                individual = eval(value.toString);
+                var individual = JSON.parse(value.toString());
                 cb(individual, null);
             }
             else {
                 // Generate request to geophysics
                 var params = { cw_xml: 'student.html', indv: id };
                 quickGet(people_url, params, function(str,err) {
-                    var individual = individualPageToObj(str);
+                    var individual = JSON.stringify(individualPageToObj(str));
 
                     memjs.set('people:'+id, individual);
                     cb(individual, null);
