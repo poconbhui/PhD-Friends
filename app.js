@@ -11,11 +11,17 @@ var app = express();
 app.configure(function() {
     app.set('port', process.env.PORT || 3000);
 
+    // Serve .html files
     app.set('views', __dirname + '/views');
     app.set('view engine', 'ejs');
     app.engine('.html', ejs.__express);
 
-    app.use('/assets', express.static(__dirname + '/assets'));
+    // Serve static files from /assets
+    var one_year = 31557600000;
+    app.use(
+        '/assets',
+        express.static(__dirname + '/assets', {maxAge: one_year})
+    );
 });
 
 
