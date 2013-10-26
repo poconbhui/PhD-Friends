@@ -9,7 +9,7 @@ var app = express();
 
 // Set up express
 app.configure(function() {
-    app.set('port', process.env.PORT || 3000);
+    app.set('port', process.env.PORT || 5000);
 
     // Serve .html files
     app.set('views', __dirname + '/views');
