@@ -32,7 +32,7 @@ app.get('/', function(req, res) {
 
 
 // Serve people pages
-var people = require(__dirname + '/people');
+var people = require(__dirname + '/controllers/people_controller');
 
 app.get('/people', people.index);
 app.get('/people/:id', people.show);

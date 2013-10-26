@@ -1,6 +1,6 @@
 "use strict"
 
-var quickGet = require(__dirname + '/quickGet');
+var quickGet = require(__dirname + '/../helpers/quickGet');
 
 
 // This object provides routing for /people.
