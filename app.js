@@ -80,6 +80,7 @@ function quickGet(url, params, cb) {
 //
 
 // Proxy geosciences people page via /people
+// Send list of people as JSON
 app.get('/people', function(req, res) {
 
     // Generate request to geophysics
@@ -87,9 +88,36 @@ app.get('/people', function(req, res) {
     var params = { cw_xml: 'students.html' };
 
     quickGet(people, params, function(str,err) {
-        res.send(str);
+        res.send(peoplePageToArr(str));
     });
 });
+
+
+function peoplePageToArr(data) {
+
+    // Get links between title Full-Time... and M.Sc.
+    // Effectively, only PhD students
+    data = data.match(
+        /Full-Time Research Students.*M.Sc. Carbon Capture and Storage/
+    )[0];
+
+    // Match all person links in selected section
+    var matches = data.match(
+        /<a href=[^>]*indv=\d*&cw_xml=student.html">[^<]*<\/a>/g
+    );
+
+    // Parse the links into a format {indv, name}
+    for(var i in matches) {
+        data = matches[i].match(/indv=(\d*)&.*>(.*)</);
+
+        matches[i] = {
+            indv: data[1],
+            name: data[2]
+        };
+    }
+
+    return matches
+}
 
 
 // Proxy geosciences individual pages via /people/:id
@@ -101,9 +129,30 @@ app.get('/people/:id', function(req, res) {
     var params = { cw_xml: 'student.html', indv: req.params.id };
 
     quickGet(people, params, function(str,err) {
-        res.send(str);
+        res.send(individualPageToObj(str));
     });
 });
+
+
+function individualPageToObj(data) {
+    var individual = {};
+
+    individual.face = (function() {
+        var matches = data.match(/src="([^"]*\/faces\/[^"]*)"/);
+
+        if(matches) return matches[1];
+        else        return 'None';
+    })();
+
+    individual.name = (function() {
+        var matches = data.match(/<div id="geosPeople"> *<h3>([^<]*)<\/h3>/);
+
+        if(matches) return matches[1];
+        else        return 'None';
+    })();
+
+    return individual;
+}
 
 
 

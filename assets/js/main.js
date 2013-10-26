@@ -64,27 +64,6 @@ var score = new function() {
 };
 
 
-// Scrape the student page and return the data in cb(data, error)
-function scrapeStudentsPage(cb) {
-    $.get(
-        '/people',
-        function(data) {
-            cb(data, null);
-        }
-    );
-}
-
-
-// Scrape an individual's page from their id and return in cb(data, error)
-function scrapeIndividualPage(indv, cb) {
-    $.get(
-        '/people/' + indv,
-        function(data) {
-            cb(data, null);
-        }
-    );
-}
-
 
 // Get a list of students {indv, name} and return in cb(students, error)
 var getStudentsCache = [];
@@ -93,34 +72,12 @@ function getStudents(cb) {
         cb(getStudentsCache, null);
     }
     else {
-        scrapeStudentsPage(function(data) {
-
-            // Get links between title Full-Time... and M.Sc.
-            // Effectively, only PhD students
-            data = data.match(
-                /Full-Time Research Students.*M.Sc. Carbon Capture and Storage/
-            )[0];
-
-            // Match all person links in selected section
-            var matches = data.match(
-                /<a href=[^>]*indv=\d*&cw_xml=student.html">[^<]*<\/a>/g
-            );
-
-            // Parse the links into a format {indv, name}
-            for(var i in matches) {
-                data = matches[i].match(/indv=(\d*)&.*>(.*)</);
-
-                matches[i] = {
-                    indv: data[1],
-                    name: data[2]
-                };
-            }
-
+        $.getJSON('/people', function(data) {
             // Cache results
-            getStudentsCache = matches;
+            getStudentsCache = data;
 
             // Return all the parsed matches
-            cb(matches, null);
+            cb(data, null);
         });
     }
 }
@@ -134,27 +91,11 @@ function getIndividual(indv, cb) {
         cb(getIndividualCache[indv], null);
     }
     else {
-        scrapeIndividualPage(indv, function(data) {
-            var individual = {};
-
-            individual.face = (function() {
-                var matches = data.match(/src="([^"]*\/faces\/[^"]*)"/);
-
-                if(matches) return matches[1];
-                else        return 'None';
-            })();
-
-            individual.name = (function() {
-                var matches = data.match(/<div id="geosPeople"> *<h3>([^<]*)<\/h3>/);
-
-                if(matches) return matches[1];
-                else        return 'None';
-            })();
-
+        $.getJSON('/people/' + indv, function(data) {
             // Add individual to cache
-            getIndividualCache[indv] = individual;
+            getIndividualCache[indv] = data;
 
-            cb(individual, null);
+            cb(data, null);
         });
     }
 }
