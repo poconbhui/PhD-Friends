@@ -11,6 +11,9 @@ var app = express();
 app.configure(function() {
     app.set('port', process.env.PORT || 5000);
 
+    // Add gzipping while sending data
+    app.use(express.compress());
+
     // Serve .html files
     app.set('views', __dirname + '/views');
     app.set('view engine', 'ejs');
