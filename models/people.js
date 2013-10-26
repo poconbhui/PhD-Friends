@@ -1,22 +1,13 @@
 "use strict"
 
 var quickGet = require(__dirname + '/../helpers/quickGet');
+var memjs = require('memjs').Client.create();
 
 
 var People = function() {
 
     var people_url =
         'http://www.ed.ac.uk/schools-departments/geosciences/people';
-
-    // Cache for processed geosciences people page
-    // Contains list of individual ids
-    var peopleCache = [];
-
-    // Cache for processed geosciences individual page
-    // Contains objects of the form
-    //   individualCache[id] = {face:'/url/to/face.jpg', name: 'My Name'}
-    var individualCache = {};
-
 
 
     /////////////////////
@@ -26,19 +17,24 @@ var People = function() {
 
     // Return array containing ids for everyone in geoscience
     this.all = function(cb) {
+        memjs.get('people', function(err, value, key) {
+            if(value) {
+                console.log("Have value");
+                var people = eval(value.toString());
+                cb(people, null);
+            }
+            else {
+                console.log("Fetching");
+                // Generate request to geophysics
+                var params = { cw_xml: 'students.html' };
+                quickGet(people_url, params, function(str,err) {
+                    var people = JSON.stringify(peoplePageToArr(str));
 
-        if(peopleCache.length == 0) {
-            // Generate request to geophysics
-            var params = { cw_xml: 'students.html' };
-            quickGet(people_url, params, function(str,err) {
-                peopleCache = peoplePageToArr(str);
-
-                cb(peopleCache, null);
-            });
-        }
-        else {
-            cb(peopleCache, null);
-        }
+                    memjs.set('people', people);
+                    cb(people, peopleCache, null);
+                });
+            }
+        });
     };
 
 
@@ -46,18 +42,22 @@ var People = function() {
     // Return an object containing a url to the person's face and
     // their name
     this.find = function(id, cb) {
-        if(!individualCache[id]) {
-            // Generate request to geophysics
-            var params = { cw_xml: 'student.html', indv: id };
-            quickGet(people_url, params, function(str,err) {
-                individualCache[id] = individualPageToObj(str);
+        memjs.get('people:'+id, function(err, value, key) {
+            if(value) {
+                individual = eval(value.toString);
+                cb(individual, null);
+            }
+            else {
+                // Generate request to geophysics
+                var params = { cw_xml: 'student.html', indv: id };
+                quickGet(people_url, params, function(str,err) {
+                    var individual = individualPageToObj(str);
 
-                cb(individualCache[id], null);
-            });
-        }
-        else {
-            cb(individualCache[id], null);
-        }
+                    memjs.set('people:'+id, individual);
+                    cb(individual, null);
+                });
+            }
+        });
     };
 
 
