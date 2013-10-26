@@ -81,15 +81,23 @@ function quickGet(url, params, cb) {
 
 // Proxy geosciences people page via /people
 // Send list of people as JSON
+var peopleCache = [];
 app.get('/people', function(req, res) {
 
     // Generate request to geophysics
     var people = 'http://www.ed.ac.uk/schools-departments/geosciences/people'
     var params = { cw_xml: 'students.html' };
 
-    quickGet(people, params, function(str,err) {
-        res.send(peoplePageToArr(str));
-    });
+    if(peopleCache.length == 0) {
+        quickGet(people, params, function(str,err) {
+            peopleCache = peoplePageToArr(str);
+
+            res.send(peopleCache);
+        });
+    }
+    else {
+        res.send(peopleCache);
+    }
 });
 
 
@@ -121,6 +129,7 @@ function peoplePageToArr(data) {
 
 
 // Proxy geosciences individual pages via /people/:id
+var individualCache = {};
 app.get('/people/:id', function(req, res) {
     console.log(req.params);
 
@@ -128,9 +137,16 @@ app.get('/people/:id', function(req, res) {
     var people = 'http://www.ed.ac.uk/schools-departments/geosciences/people'
     var params = { cw_xml: 'student.html', indv: req.params.id };
 
-    quickGet(people, params, function(str,err) {
-        res.send(individualPageToObj(str));
-    });
+    if(!individualCache[req.params.id]) {
+        quickGet(people, params, function(str,err) {
+            individualCache[req.params.id] = individualPageToObj(str);
+
+            res.send(individualCache[req.params.id]);
+        });
+    }
+    else {
+        res.send(individualCache[req.params.id]);
+    }
 });
 
 
