@@ -31,7 +31,7 @@ var People = function() {
                     var people = JSON.stringify(peoplePageToArr(str));
 
                     memjs.set('people', people);
-                    cb(people, peopleCache, null);
+                    cb(people, null);
                 });
             }
         });
