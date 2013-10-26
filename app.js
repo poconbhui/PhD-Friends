@@ -39,6 +39,13 @@ app.get('/people/:id', PeopleController.show);
 
 
 
+// Serve face images
+var FaceController = require(__dirname + '/controllers/face_controller');
+
+app.get('/faces/:id', FaceController.show);
+
+
+
 
 // Connect to port
 app.listen(app.get('port'), function(){

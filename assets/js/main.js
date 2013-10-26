@@ -166,7 +166,7 @@ function get_new_face() {
                             // Clear everything
                             reset_game();
 
-                            $face.attr('src', individual.face);
+                            $face.attr('src', img.src);
                             $face.data('name', individual.name);
 
                             $guessed_name.focus();
@@ -189,7 +189,7 @@ function get_new_face() {
                     localGetIndividual();
                 }
 
-                img.src = individual.face;
+                img.src = '/faces/'+student_id;
             });
         })();
     });
