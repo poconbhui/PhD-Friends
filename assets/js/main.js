@@ -66,38 +66,20 @@ var score = new function() {
 
 
 // Get a list of students {indv, name} and return in cb(students, error)
-var getStudentsCache = [];
 function getStudents(cb) {
-    if(getStudentsCache.length) {
-        cb(getStudentsCache, null);
-    }
-    else {
-        $.getJSON('/people', function(data) {
-            // Cache results
-            getStudentsCache = data;
-
-            // Return all the parsed matches
-            cb(data, null);
-        });
-    }
+    $.getJSON('/people', function(data) {
+        // Return all the parsed matches
+        cb(data, null);
+    });
 }
 
 
 // Get data {face, name} for an individual from their id and return
 // in cb(individual, error)
-var getIndividualCache = {};
 function getIndividual(indv, cb) {
-    if(getIndividualCache[indv]) {
-        cb(getIndividualCache[indv], null);
-    }
-    else {
-        $.getJSON('/people/' + indv, function(data) {
-            // Add individual to cache
-            getIndividualCache[indv] = data;
-
-            cb(data, null);
-        });
-    }
+    $.getJSON('/people/' + indv, function(data) {
+        cb(data, null);
+    });
 }
 
 
