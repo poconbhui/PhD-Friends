@@ -68,7 +68,6 @@ var score = new function() {
 function scrapeStudentsPage(cb) {
     $.get(
         '/people',
-        { cw_xml: 'students.html' },
         function(data) {
             cb(data, null);
         }
@@ -79,11 +78,7 @@ function scrapeStudentsPage(cb) {
 // Scrape an individual's page from their id and return in cb(data, error)
 function scrapeIndividualPage(indv, cb) {
     $.get(
-        '/people',
-        {
-            indv: indv,
-            cw_xml: 'student.html'
-        },
+        '/people/' + indv,
         function(data) {
             cb(data, null);
         }

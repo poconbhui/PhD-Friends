@@ -36,6 +36,11 @@ app.get('/', function(req, res) {
 });
 
 
+
+//
+// Some nice http getting functions
+//
+
 // Given an object, return a GET friendly string
 function objectToGet(obj) {
     var ret = '';
@@ -49,15 +54,11 @@ function objectToGet(obj) {
     return ret;
 }
 
-
-// Proxy geosciences people page via /people
-app.get('/people', function(req, res) {
-
-    // Generate request to geophysics
-    var people = 'http://www.ed.ac.uk/schools-departments/geosciences/people'
-    people += '?' + objectToGet(req.query);
-
-    http.get(people, function(people_res) {
+// Get data from a url with the given params as an object
+// and return the string of data in cb(string, err)
+function quickGet(url, params, cb) {
+    console.log(url + '?' + objectToGet(params));
+    http.get(url + '?' + objectToGet(params), function(people_res) {
 
         var str = '';
 
@@ -68,10 +69,43 @@ app.get('/people', function(req, res) {
 
         //the whole response has been recieved, so we just print it out here
         people_res.on('end', function () {
-            res.send(str);
+            cb(str, null);
         });
     });
+}
+
+
+//
+// Geosciences proxying routes
+//
+
+// Proxy geosciences people page via /people
+app.get('/people', function(req, res) {
+
+    // Generate request to geophysics
+    var people = 'http://www.ed.ac.uk/schools-departments/geosciences/people'
+    var params = { cw_xml: 'students.html' };
+
+    quickGet(people, params, function(str,err) {
+        res.send(str);
+    });
 });
+
+
+// Proxy geosciences individual pages via /people/:id
+app.get('/people/:id', function(req, res) {
+    console.log(req.params);
+
+    // Generate request to geophysics
+    var people = 'http://www.ed.ac.uk/schools-departments/geosciences/people'
+    var params = { cw_xml: 'student.html', indv: req.params.id };
+
+    quickGet(people, params, function(str,err) {
+        res.send(str);
+    });
+});
+
+
 
 
 // Connect to port
