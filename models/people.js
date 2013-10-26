@@ -19,12 +19,10 @@ var People = function() {
     this.all = function(cb) {
         memjs.get('people', function(err, value, key) {
             if(value) {
-                console.log("Have value");
                 var people = eval(value.toString());
                 cb(people, null);
             }
             else {
-                console.log("Fetching");
                 // Generate request to geophysics
                 var params = { cw_xml: 'students.html' };
                 quickGet(people_url, params, function(str,err) {
