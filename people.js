@@ -61,8 +61,6 @@ var people = function() {
     // Send a json object containing a url to the person's face and
     // their name
     this.show = function(req, res) {
-        console.log(req.params);
-
         // Generate request to geophysics
         var people = people_url;
         var params = { cw_xml: 'student.html', indv: req.params.id };
