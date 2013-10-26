@@ -101,6 +101,8 @@ app.get('/people', function(req, res) {
 });
 
 
+// Parse the scraped people page to an array of indv ids.
+// return: [id1, id2, id3, ...]
 function peoplePageToArr(data) {
 
     // Get links between title Full-Time... and M.Sc.
@@ -118,9 +120,7 @@ function peoplePageToArr(data) {
     for(var i in matches) {
         data = matches[i].match(/indv=(\d*)&/);
 
-        matches[i] = {
-            indv: data[1]
-        };
+        matches[i] = data[1];
     }
 
     return matches
@@ -149,6 +149,9 @@ app.get('/people/:id', function(req, res) {
 });
 
 
+// Parse an individual's page to an object containing a url to their
+// picture and their full name.
+// return: {face: 'url/to/face.jpg', name: 'My Name'}
 function individualPageToObj(data) {
     var individual = {};
 

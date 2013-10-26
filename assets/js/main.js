@@ -138,9 +138,9 @@ function get_new_face() {
             var focus = $new_list.data('start') || 0;
             var width = $new_list.data('length') || students.length-1;
 
-            var student = get_arr_random(students, focus, focus + width);
+            var student_id = get_arr_random(students, focus, focus + width);
 
-            getIndividual(student.indv, function(individual) {
+            getIndividual(student_id, function(individual) {
 
                 // If dummy image, try again
                 if(individual.face.match(/dummy.jpg/)) {
@@ -315,8 +315,6 @@ $list_length_options.find('a').click(function() {
     if(val == 'all') val = 0;
 
     val = parseInt(val);
-
-    console.log(val);
 
     $new_list.data('length', val);
 
