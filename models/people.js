@@ -3,6 +3,15 @@
 var memjs = require('memjs').Client.create();
 var request = require('request');
 
+function ensureFunction(f) {
+    if(typeof f == 'function') {
+        return f;
+    }
+    else {
+        return function() {};
+    }
+}
+
 
 var People = function() {
     var _this = this;
@@ -18,6 +27,8 @@ var People = function() {
 
     // Return array containing ids for everyone in geoscience
     this.all = function(cb) {
+        cb = ensureFunction(cb);
+
         memjs.get('people', function(err, value, key) {
             if(value) {
                 var people = JSON.parse(value.toString());
@@ -46,6 +57,8 @@ var People = function() {
     // Return an object containing a url to the person's face and
     // their name
     this.find = function(id, cb) {
+        cb = ensureFunction(cb);
+
         memjs.get('people:'+id, function(err, value, key) {
             if(value) {
                 var individual = JSON.parse(value.toString());
@@ -127,6 +140,8 @@ var People = function() {
     // return: cb({face: 'url/to/face.jpg', name: 'My Name'})
     // or cb({err: "Error Description"}) on error
     function individualPageToObj(data, cb) {
+        cb = ensureFunction(cb);
+
         var individual = {};
 
         // Get person's name
