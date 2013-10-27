@@ -169,31 +169,26 @@ function get_new_face() {
 
 // Check that the guess in $guessed_name is either the first name or whole name
 // stored in $face.data('name')
-function check_guess() {
-    var guess = $guessed_name.val();
+function check_guess(guess) {
     var answer = $face.data('name');
     var first_name = answer.split(' ')[0];
 
+    var right_pos=0;
 
-    function compare_names() {
-        var n1 = guess.toLowerCase().split(' ');
-        var n2 = answer.toLowerCase().split(' ');
+    var n1 = guess.toLowerCase().split(' ');
+    var n2 = answer.toLowerCase().split(' ');
 
-        for(var i=0; i<n2.length; i++) {
-            if(n1[i] != n2[i]) {
-                break;
-            }
+    for(right_pos=0; right_pos<n2.length; right_pos++) {
+        if(n1[right_pos] != n2[right_pos]) {
+            break;
         }
-
-        return i;
     }
 
 
     // If right
-    var i = compare_names();
-    if(i) {
-        var right = answer.split(' ').slice(0, i).join(' ');
-        var wrong = answer.split(' ').slice(i).join(' ');
+    if(right_pos) {
+        var right = answer.split(' ').slice(0, right_pos).join(' ');
+        var wrong = answer.split(' ').slice(right_pos).join(' ');
 
         return {right: right, wrong: wrong};
 
@@ -216,13 +211,20 @@ function check_guess() {
 
 // On clicking "guess", check guess
 $make_guess.click(function() {
+    var guess = $guessed_name.val();
+
+    // Reset guess field for next guess
+    $guessed_name.val('');
+
+
     // Quick check that guess is not null before num_guesses is touched
-    if($guessed_name.val().length == 0) return;
+    if(guess.length == 0) return;
 
     var num_guesses = $make_guess.data('num_guesses') - 1;
     $make_guess.data('num_guesses', num_guesses);
 
-    var correct = check_guess();
+    var correct = check_guess(guess);
+
 
     if(correct) {
         $guesses.append(
@@ -232,13 +234,13 @@ $make_guess.click(function() {
             + "</li>"
         );
 
-        if(!$give_up.data('gave_up')) score.add($guessed_name.val());
+        if(!$give_up.data('gave_up')) score.add(guess);
 
         get_new_face();
     }
     else {
         $guesses.append(
-            "<li class='alert-danger'>"+$guessed_name.val()+"</li>"
+            "<li class='alert-danger'>"+guess+"</li>"
         );
 
         if(num_guesses <= 0) {
@@ -246,9 +248,6 @@ $make_guess.click(function() {
             return;
         }
     }
-
-    // Reset guess field for next guess
-    $guessed_name.val('');
 });
 
 
