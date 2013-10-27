@@ -2,7 +2,6 @@
 
 var memjs = require('memjs').Client.create();
 var request = require('request');
-var qs = require('querystring');
 
 
 var People = function() {
@@ -25,16 +24,18 @@ var People = function() {
                 cb(people, null);
             }
             else {
-                // Generate request to geophysics
-                var url = people_url
-                    + '?' + qs.stringify({ cw_xml: 'students.html' });
+                // Generate request to geophysics postgrad students page
+                var params = { cw_xml: 'students.html' };
+                request(
+                    { url: people_url, qs: params },
+                    function(err, headers, body) {
+                        // Extract data from page
+                        var people = peoplePageToArr(body);
 
-                request(url, function(err, headers, body) {
-                    var people = peoplePageToArr(body);
-
-                    memjs.set('people', JSON.stringify(people));
-                    cb(people, null);
-                });
+                        memjs.set('people', JSON.stringify(people));
+                        cb(people, null);
+                    }
+                );
             }
         });
     };
@@ -50,16 +51,18 @@ var People = function() {
                 cb(individual, null);
             }
             else {
-                // Generate request to geophysics
-                var url = people_url
-                    + '?' + qs.stringify({ cw_xml: 'student.html', indv: id });
+                // Generate request to geophysics individual page
+                var params = { cw_xml: 'student.html', indv: id };
+                request(
+                    { url: people_url, qs: params},
+                    function(err, headers, body) {
+                        // Extract data from page
+                        var individual = individualPageToObj(body);
 
-                request(url, function(err, headers, body) {
-                    var individual = individualPageToObj(body);
-
-                    memjs.set('people:'+id, JSON.stringify(individual));
-                    cb(individual, null);
-                });
+                        memjs.set('people:'+id, JSON.stringify(individual));
+                        cb(individual, null);
+                    }
+                );
             }
         });
     };
