@@ -30,6 +30,7 @@ var name_per_round = 10;
 
 
 
+
 /////////////////////////////////////////
 // Define functions for use in the app //
 /////////////////////////////////////////
@@ -95,6 +96,7 @@ function get_arr_random(array, start, end) {
 // Reset everything
 function reset_game() {
     $guessed_name.val('');
+    $guessed_name.attr('placeholder', '');
 
     $face.attr('src', null);
     $face.data('name', 'None');
@@ -234,7 +236,13 @@ $guessed_name.keydown(function(e) {
 // and remove the appropriate score
 $give_up.click(function() {
     if(!$give_up.data('gave_up')) score.remove($face.data('name'));
-    $guessed_name.val($face.data('name'));
+
+    if(Modernizr.input.placeholder) {
+        $guessed_name.attr('placeholder', $face.data('name'));
+    }
+    else {
+        $guessed_name.val($face.data('name'));
+    }
 
     $give_up.data('gave_up', true);
 });
