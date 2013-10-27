@@ -190,9 +190,12 @@ function check_guess() {
 
 
     // If right
-    if(compare_names()) {
+    var i = compare_names();
+    if(i) {
+        var right = answer.split(' ').slice(0, i).join(' ');
+        var wrong = answer.split(' ').slice(i).join(' ');
 
-        return true;
+        return [right, wrong];
 
     }
     // If wrong
@@ -222,7 +225,12 @@ $make_guess.click(function() {
     var correct = check_guess();
 
     if(correct) {
-        $guesses.append("<li class='alert-success'>"+$face.data('name')+"</li>");
+        $guesses.append(
+            "<li class='alert-success'>"
+                + correct[0] + " "
+                + "<span class='text-danger'>" + correct[1] + "</span>"
+            + "</li>"
+        );
 
         if(!$give_up.data('gave_up')) score.add($guessed_name.val());
 
