@@ -264,10 +264,12 @@ $give_up.click(function() {
 
     if(Modernizr.input.placeholder) {
         $guessed_name.attr('placeholder', $face.data('name'));
+        $guessed_name.focus();
     }
     else {
         $guessed_name.val($face.data('name'));
     }
+
 
     $give_up.data('gave_up', true);
 });
