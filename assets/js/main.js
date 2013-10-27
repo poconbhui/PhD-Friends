@@ -84,12 +84,28 @@ function getIndividual(indv, cb) {
 }
 
 
-// Return a random element from an array within a focus
-function get_arr_random(array, start, end) {
-    var elem = Math.floor(start + Math.random()*(end - start));
-    //var elem = Math.floor(Math.random()*array.length)
-    
-    return array[elem];
+
+// Shuffle array in place
+// From: http://stackoverflow.com/a/2450976
+function shuffle(array) {
+    var currentIndex = array.length;
+    var temporaryValue;
+    var randomIndex;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+        // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    }
+
+    return array;
 }
 
 
@@ -116,36 +132,37 @@ function get_new_face() {
     // Disable answering for a minute
     $face.data('name', 'None');
 
-    // Scrape a new face and name
-    getStudents(function(students) {
-        (function localGetIndividual() {
-            var focus = $new_list.data('start') || 0;
-            var width = $new_list.data('length') || students.length-1;
+    // If no students, wait a bit and try again
+    if(!$new_list.data('all') || !$new_list.data('sublist')) {
+        setTimeout(get_new_face, 500);
+        return;
+    }
 
-            var student_id = get_arr_random(students, focus, focus + width);
+    var students = $new_list.data('sublist');
 
-            getIndividual(student_id, function(individual) {
+    // Not super efficient but OH WELL 
+    var student_id = shuffle(students)[0];
 
-                // If there was an error, try again
-                if(individual.err) {
-                    localGetIndividual();
-                    return;
-                }
+    getIndividual(student_id, function(individual) {
 
-                // Want face to hang for about a second
-                setTimeout(function() {
-                    // Clear everything
-                    reset_game();
+        // If there was an error, try again
+        if(individual.err) {
+            setTimeout(get_new_face, 0);
+            return;
+        }
 
-                    $face.attr(
-                        'src', 'data:image/jpeg;base64,' + individual.face
-                    );
-                    $face.data('name', individual.name);
+        // Want face to hang for about a second
+        setTimeout(function() {
+            // Clear everything
+            reset_game();
 
-                    $guessed_name.focus();
-                }, 1000);
-            });
-        })();
+            $face.attr(
+                'src', 'data:image/jpeg;base64,' + individual.face
+            );
+            $face.data('name', individual.name);
+
+            $guessed_name.focus();
+        }, 1000);
     });
 }
 
@@ -250,14 +267,17 @@ $give_up.click(function() {
 
 // Set up new list generation
 $new_list.click(function() {
-    // If working over the whole list, always start at 0
-    if(!$new_list.data('length')){
-        $new_list.data('start', 0);
-        return;
-    }
-
     getStudents(function(students) {
-        $new_list.data('start', Math.floor(Math.random()*students.length));
+        $new_list.data('all', students);
+
+        if(!$new_list.data('length')){
+            $new_list.data('sublist', $new_list.data('all'));
+        }
+        else {
+            $new_list.data(
+                'sublist', shuffle(students).slice(0, $new_list.data('length'))
+            );
+        }
     });
 }).click();
 
