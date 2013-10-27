@@ -195,7 +195,7 @@ function check_guess() {
         var right = answer.split(' ').slice(0, i).join(' ');
         var wrong = answer.split(' ').slice(i).join(' ');
 
-        return [right, wrong];
+        return {right: right, wrong: wrong};
 
     }
     // If wrong
@@ -227,8 +227,8 @@ $make_guess.click(function() {
     if(correct) {
         $guesses.append(
             "<li class='alert-success'>"
-                + correct[0] + " "
-                + "<span class='text-danger'>" + correct[1] + "</span>"
+                + correct.right + " "
+                + "<span class='text-danger'>" + correct.wrong + "</span>"
             + "</li>"
         );
 
@@ -237,7 +237,9 @@ $make_guess.click(function() {
         get_new_face();
     }
     else {
-        $guesses.append("<li class='alert-danger'>"+$guessed_name.val()+"</li>");
+        $guesses.append(
+            "<li class='alert-danger'>"+$guessed_name.val()+"</li>"
+        );
 
         if(num_guesses <= 0) {
             $give_up.click();
@@ -270,7 +272,6 @@ $give_up.click(function() {
         $guessed_name.val($face.data('name'));
     }
 
-
     $give_up.data('gave_up', true);
 });
 
@@ -281,7 +282,8 @@ $new_list.click(function() {
         $new_list.data('all', students);
 
         if(!$new_list.data('length')){
-            $new_list.data('sublist', $new_list.data('all'));
+            // Length of 0 means use whole list
+            $new_list.data('sublist', students);
         }
         else {
             $new_list.data(
@@ -302,22 +304,25 @@ $list_length_options.find('a').click(function() {
     // Find value of current option
     var val = $this.text();
 
+    // Parse value to integer
     if(val == 'all') val = 0;
-
     val = parseInt(val);
 
     $new_list.data('length', val);
 
-    // Get a new list for the new number
+    // Refresh the list
     $new_list.click();
 
     // Mark this option
     $this.append('  <span class="glyphicon glyphicon-ok"></span>');
+
+    return false;
 });
 
 // Initially click the "all" option
 $list_length_options.find('a:contains(all)').click();
 
+// Make sure dropdown is closed on page load
 $('.open .dropdown-toggle').dropdown('toggle');
 
 
