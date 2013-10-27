@@ -31,18 +31,11 @@ app.get('/', function(req, res) {
 
 
 
-// Serve people pages
+// Serve people
 var PeopleController = require(__dirname + '/controllers/people_controller');
 
 app.get('/people', PeopleController.index);
 app.get('/people/:id', PeopleController.show);
-
-
-
-// Serve face images
-var FaceController = require(__dirname + '/controllers/face_controller');
-
-app.get('/faces/:id', FaceController.show);
 
 
 

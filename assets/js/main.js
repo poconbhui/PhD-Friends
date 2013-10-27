@@ -124,54 +124,24 @@ function get_new_face() {
 
             getIndividual(student_id, function(individual) {
 
-                // If dummy image, try again
-                if(individual.face.match(/dummy.jpg/)) {
+                // If there was an error, try again
+                if(individual.err) {
                     localGetIndividual();
                     return;
                 }
-
-                // If no name, try again
-                if(individual.name == 'None') {
-                    localGetIndividual();
-                    return;
-                }
-
-                // Generate setting function
-                // Expect it to be called twice before running
-                var set_face = (function() {
-                    var count = 0;
-
-                    return function() {
-                        count = count + 1;
-
-                        if(count == 2) {
-                            // Clear everything
-                            reset_game();
-
-                            $face.attr('src', img.src);
-                            $face.data('name', individual.name);
-
-                            $guessed_name.focus();
-                        }
-                    }
-                })();
 
                 // Want face to hang for about a second
-                setTimeout(set_face, 1000);
+                setTimeout(function() {
+                    // Clear everything
+                    reset_game();
 
+                    $face.attr(
+                        'src', 'data:image/jpeg;base64,' + individual.face
+                    );
+                    $face.data('name', individual.name);
 
-                // Use Image so we can catch 404ed images
-                var img = new Image;
-
-                // When loaded, set face and name
-                img.onload = set_face;
-
-                // On error, rerun this function
-                img.onerror = function() {
-                    localGetIndividual();
-                }
-
-                img.src = '/faces/'+student_id;
+                    $guessed_name.focus();
+                }, 1000);
             });
         })();
     });

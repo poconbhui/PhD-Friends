@@ -5,6 +5,7 @@ var request = require('request');
 
 
 var People = function() {
+    var _this = this;
 
     var people_url =
         'http://www.ed.ac.uk/schools-departments/geosciences/people';
@@ -57,10 +58,30 @@ var People = function() {
                     { url: people_url, qs: params},
                     function(err, headers, body) {
                         // Extract data from page
-                        var individual = individualPageToObj(body);
+                        individualPageToObj(body, function(individual){
+                            individual.id = id;
 
-                        memjs.set('people:'+id, JSON.stringify(individual));
-                        cb(individual, null);
+                            if(!individual.err) {
+                                memjs.set(
+                                    'people:'+id, JSON.stringify(individual)
+                                );
+                                cb(individual, null);
+                            }
+                            else {
+                                // If error, remove person from people list
+                                _this.all(function(people) {
+                                    var index = people.indexOf(id); 
+                                    if(index > -1) {
+                                        people.splice(index, 1);
+                                        memjs.set(
+                                            'people', JSON.stringify(people)
+                                        );
+                                    }
+                                });
+
+                                cb(null, {err: individual.err});
+                            }
+                        });
                     }
                 );
             }
@@ -103,10 +124,27 @@ var People = function() {
 
     // Parse an individual's page to an object containing a url to their
     // picture and their full name.
-    // return: {face: 'url/to/face.jpg', name: 'My Name'}
-    function individualPageToObj(data) {
+    // return: cb({face: 'url/to/face.jpg', name: 'My Name'})
+    // or cb({err: "Error Description"}) on error
+    function individualPageToObj(data, cb) {
         var individual = {};
 
+        // Get person's name
+        individual.name = (function() {
+            var matches =
+                data.match(/<div id="geosPeople"> *<h3>([^<]*)<\/h3>/);
+
+            if(matches) return matches[1];
+            else        return 'None';
+        })();
+
+        // If no name, return an error
+        if(individual.name == 'None') {
+            cb({err: "No Name"});
+            return;
+        }
+
+        // Get face url
         individual.face = (function() {
             var matches = data.match(/src="([^"]*\/faces\/[^"]*)"/);
 
@@ -114,14 +152,37 @@ var People = function() {
             else        return 'None';
         })();
 
-        individual.name = (function() {
-            var matches = data.match(/<div id="geosPeople"> *<h3>([^<]*)<\/h3>/);
+        // If no face URL, return an error
+        if(individual.face == 'None') {
+            cb({err: "No Face"});
+            return;
+        }
 
-            if(matches) return matches[1];
-            else        return 'None';
-        })();
+        // If face URL is for dummy image, return an error
+        if(individual.face.match('dummy.jpg')) {
+            cb({err: "Dummy Face"});
+            return;
+        }
 
-        return individual;
+        // Load the face and base64 encode
+        request(
+            { url: individual.face, encoding: null },
+            function(err, headers, body) {
+                // If error, or not 200 status code, return an error
+                // Eg, bad request or 404 error
+                if(err || headers.statusCode != 200) {
+                    individual.err = "" + headers.statusCode + " Face";
+                }
+
+                // Base64 encode face image
+                var body64 = body.toString('base64');
+                individual.face = body64;
+
+                // Finally return the individual
+                cb(individual);
+            }
+        );
+
     }
 
 };

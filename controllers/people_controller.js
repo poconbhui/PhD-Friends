@@ -20,8 +20,9 @@ var PeopleController = function() {
     // Send JSON array containing a list of ids for all research students
     // in geoscience
     this.index = function(req, res) {
-        People.all(function(ids) {
-            res.send(ids);
+        People.all(function(ids, err) {
+            if(!err) res.send(ids);
+            else     res.send(err);
         });
     };
 
@@ -30,8 +31,9 @@ var PeopleController = function() {
     // Send a json object containing a url to the person's face and
     // their name
     this.show = function(req, res) {
-        People.find(req.params.id, function(person) {
-            res.send(person);
+        People.find(req.params.id, function(person, err) {
+            if(!err) res.send(person);
+            else     res.send(err);
         });
     };
 
